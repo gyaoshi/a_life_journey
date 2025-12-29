@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生旅程游戏 - 主页</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            color: #4ecdc4;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            color: #cccccc;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        .game-links {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .game-link {
+            display: block;
+            color: #4ecdc4;
+            text-decoration: none;
+            padding: 20px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+        .game-link:hover {
+            background: #4ecdc4;
+            color: #1a1a2e;
+            transform: translateY(-2px);
+        }
+        .status {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 10px;
+            color: #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 人生旅程游戏</h1>
+        <div class="subtitle">体验完整的人生 - 从出生到老年的100秒旅程</div>
+        
+        <div class="game-links">
+            <a href="enhanced-game.html" class="game-link">
+                🚀 开始游戏
+            </a>
+            <a href="test-server.html" class="game-link">
+                🔧 服务器测试
+            </a>
+        </div>
+        
+        <div class="status">
+            <h3>✅ 服务器运行正常</h3>
+            <p>当前时间: <span id="time"></span></p>
+            <p>服务器地址: http://localhost:8000</p>
+        </div>
+    </div>
+    
+    <script>
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>

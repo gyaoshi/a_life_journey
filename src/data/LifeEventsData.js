@@ -27,7 +27,7 @@ class LifeEventsData {
                 type: 'simple_click',
                 difficulty: 1,
                 timeLimit: 4000,
-                points: 10,
+                points: 15,
                 icon: '😊',
                 color: '#ffb3ba',
                 target: {
@@ -199,7 +199,7 @@ class LifeEventsData {
                 description: '在舞台上展示自己',
                 type: 'moving_object',
                 difficulty: 2,
-                timeLimit: 2800,
+                timeLimit: 3200,
                 points: 55,
                 icon: '🎭',
                 color: '#b0c4de',
@@ -486,7 +486,7 @@ class LifeEventsData {
                 }
             },
             {
-                name: '买车实现梦想',
+                name: '买车创业成功',
                 description: '拥有人生第一辆车',
                 type: 'rapid_click',
                 difficulty: 4,
@@ -501,7 +501,7 @@ class LifeEventsData {
                 }
             },
             {
-                name: '投资理财成功',
+                name: '投资理财创业',
                 description: '财务自由的重要一步',
                 type: 'moving_object',
                 difficulty: 4,
@@ -516,7 +516,7 @@ class LifeEventsData {
                 }
             },
             {
-                name: '照顾年迈父母',
+                name: '孩子成家立业',
                 description: '反哺养育之恩',
                 type: 'drag_target',
                 difficulty: 4,

@@ -78,29 +78,123 @@ class GameEngine {
     /**
      * 初始化游戏引擎和所有组件
      */
-    initialize(stateManager, eventSystem, inputHandler, scoreSystem, difficultyManager) {
+    initialize(stateManager, eventSystem, inputHandler, scoreSystem, difficultyManager, gameSettings = null) {
         try {
             this.stateManager = stateManager;
             this.eventSystem = eventSystem;
             this.inputHandler = inputHandler;
             this.scoreSystem = scoreSystem;
             this.difficultyManager = difficultyManager;
+            this.gameSettings = gameSettings;
             
             // 初始化响应式管理器
             this.responsiveManager = new ResponsiveManager(this.canvas);
             
-            // 初始化完成
-            console.log('GameEngine initialized successfully');
+            // 初始化动画引擎
+            if (typeof AnimationEngine !== 'undefined') {
+                this.animationEngine = new AnimationEngine(this.canvas, {
+                    fps: this.targetFPS,
+                    quality: this.optimizationConfig.animationQuality || 'high',
+                    autoResize: true
+                });
+                
+                // 设置动画引擎的游戏计时器控制回调
+                this.animationEngine.onGameTimerPause = () => {
+                    this.pause();
+                };
+                
+                this.animationEngine.onGameTimerResume = () => {
+                    this.resume();
+                };
+                
+                console.log('AnimationEngine integrated with GameEngine');
+            }
+            
+            // 初始化角色渲染器
+            if (typeof CharacterRenderer !== 'undefined') {
+                this.characterRenderer = new CharacterRenderer(this.ctx, {
+                    quality: this.optimizationConfig.animationQuality || 'high'
+                });
+                console.log('CharacterRenderer initialized');
+            }
+            
+            // 初始化移动控制器
+            if (typeof MovementController !== 'undefined' && this.characterRenderer) {
+                this.movementController = new MovementController(this.characterRenderer, {
+                    speed: 200, // pixels per second
+                    easing: 'easeOutQuad'
+                });
+                console.log('MovementController initialized');
+            }
+            
+            // 初始化交互管理器
+            if (typeof InteractionManager !== 'undefined') {
+                this.interactionManager = new InteractionManager(this.canvas, {
+                    movementController: this.movementController,
+                    animationEngine: this.animationEngine
+                });
+                console.log('InteractionManager initialized');
+            }
+            
+            // 初始化交互圈渲染器
+            if (typeof InteractionCircleRenderer !== 'undefined') {
+                this.interactionCircleRenderer = new InteractionCircleRenderer(this.ctx, {
+                    defaultRadius: 30,
+                    strokeWidth: 4,
+                    animationSpeed: 0.05,
+                    pulseIntensity: 0.3,
+                    sparkleCount: 8,
+                    glowRadius: 10
+                });
+                console.log('InteractionCircleRenderer initialized');
+            }
+            
+            // 初始化动画可见性管理器
+            if (typeof AnimationVisibilityManager !== 'undefined' && this.animationEngine) {
+                this.animationVisibilityManager = new AnimationVisibilityManager(this.canvas, this.animationEngine, {
+                    centerPosition: { 
+                        x: this.canvas.width / 2, 
+                        y: this.canvas.height / 2 
+                    },
+                    minSize: { 
+                        width: 200, 
+                        height: 150 
+                    },
+                    maxSize: { 
+                        width: this.canvas.width * 0.8, 
+                        height: this.canvas.height * 0.8 
+                    }
+                });
+                
+                // 将可见性管理器设置到动画引擎中
+                this.animationEngine.setAnimationVisibilityManager(this.animationVisibilityManager);
+                
+                console.log('AnimationVisibilityManager initialized and connected to AnimationEngine');
+            }
+            
+            // 初始化评价系统
+            if (typeof EvaluationSystem !== 'undefined') {
+                this.evaluationSystem = new EvaluationSystem();
+                console.log('EvaluationSystem initialized');
+            }
             
             // 初始化像素艺术渲染器
             if (typeof PixelArtRenderer !== 'undefined') {
                 this.pixelRenderer = new PixelArtRenderer(this.canvas);
             }
             
+            // 初始化RPG风格渲染器
+            if (typeof RPGStyleRenderer !== 'undefined') {
+                this.rpgRenderer = new RPGStyleRenderer(this.canvas);
+            }
+            
             // 设置事件监听器
             this.setupEventListeners();
             
-            console.log('GameEngine initialized with enhanced graphics');
+            // 设置动画系统集成
+            this.setupAnimationIntegration();
+            
+            console.log('GameEngine initialized with enhanced graphics and animation system');
         } catch (error) {
             if (this.errorHandler) {
                 this.errorHandler.handleError(this.errorHandler.errorTypes.STATE_ERROR, error, {
@@ -224,19 +318,150 @@ class GameEngine {
     cleanup() {
         this.stop();
         
+        // 清理动画系统
+        if (this.animationEngine) {
+            this.animationEngine.destroy();
+            this.animationEngine = null;
+        }
+        
+        // 清理角色渲染器
+        if (this.characterRenderer) {
+            this.characterRenderer.cleanup();
+            this.characterRenderer = null;
+        }
+        
+        // 清理移动控制器
+        if (this.movementController) {
+            this.movementController.cleanup();
+            this.movementController = null;
+        }
+        
+        // 清理交互管理器
+        if (this.interactionManager) {
+            this.interactionManager.cleanup();
+            this.interactionManager = null;
+        }
+        
+        // 清理交互圈渲染器
+        if (this.interactionCircleRenderer) {
+            this.interactionCircleRenderer.reset();
+            this.interactionCircleRenderer = null;
+        }
+        
+        // 清理动画可见性管理器
+        if (this.animationVisibilityManager) {
+            this.animationVisibilityManager.destroy();
+            this.animationVisibilityManager = null;
+        }
+        
+        // 清理评价系统
+        if (this.evaluationSystem) {
+            this.evaluationSystem.hideEvaluation();
+            this.evaluationSystem = null;
+        }
+        
         if (this.responsiveManager) {
             this.responsiveManager.destroy();
             this.responsiveManager = null;
         }
         
-        console.log('GameEngine cleanup completed');
+        if (this.rpgRenderer) {
+            this.rpgRenderer.reset();
+            this.rpgRenderer = null;
+        }
         
         if (this.pixelRenderer) {
             this.pixelRenderer.reset();
             this.pixelRenderer = null;
         }
         
-        console.log('GameEngine cleaned up');
+        console.log('GameEngine cleanup completed');
+    }
+    
+    /**
+     * 设置动画系统集成
+     */
+    setupAnimationIntegration() {
+        // 监听游戏开始事件，播放出生动画
+        const originalStartGame = this.stateManager.startGame?.bind(this.stateManager);
+        if (originalStartGame) {
+            this.stateManager.startGame = async () => {
+                console.log('Starting game with birth animation...');
+                
+                // 播放出生动画
+                if (this.animationEngine) {
+                    try {
+                        await this.animationEngine.playBirthAnimation();
+                        console.log('Birth animation completed, starting normal game flow');
+                    } catch (error) {
+                        console.error('Birth animation failed:', error);
+                    }
+                }
+                
+                // 启动正常游戏流程
+                originalStartGame();
+            };
+        }
+        
+        // 监听阶段转换，更新角色形态
+        const originalTransition = this.stateManager.transitionToStage?.bind(this.stateManager);
+        if (originalTransition) {
+            this.stateManager.transitionToStage = (newStage) => {
+                const oldStage = this.stateManager.getCurrentStage();
+                const result = originalTransition(newStage);
+                
+                // 更新角色形态
+                if (this.characterRenderer && newStage) {
+                    this.characterRenderer.transitionToStage(oldStage?.id, newStage.id, 1000);
+                }
+                
+                console.log('Stage transition with character form update:', oldStage?.id, '->', newStage?.id);
+                
+                return result;
+            };
+        }
+        
+        // 监听事件生成，集成移动和动画
+        const originalGenerateEvent = this.eventSystem.generateEvent?.bind(this.eventSystem);
+        if (originalGenerateEvent) {
+            this.eventSystem.generateEvent = (stage) => {
+                const event = originalGenerateEvent(stage);
+                
+                // 如果有交互管理器，协调移动和事件
+                if (this.interactionManager && event) {
+                    this.interactionManager.handleEventGenerated(event);
+                }
+                
+                // 显示交互圈
+                if (this.interactionCircleRenderer && event) {
+                    this.interactionCircleRenderer.showInteractionCircle(
+                        { x: event.position.x, y: event.position.y },
+                        'active'
+                    );
+                }
+                
+                return event;
+            };
+        }
+        
+        // 监听输入事件，集成移动控制
+        const originalHandleInput = this.handleInput.bind(this);
+        this.handleInput = (inputEvent) => {
+            // 处理角色移动
+            if (this.movementController && inputEvent.type === 'click') {
+                this.movementController.moveToPosition(inputEvent.x, inputEvent.y);
+            }
+            
+            // 处理交互事件
+            if (this.interactionManager) {
+                this.interactionManager.handleInput(inputEvent);
+            }
+            
+            // 调用原始输入处理
+            originalHandleInput(inputEvent);
+        };
+        
+        console.log('Animation system integration completed');
     }
     
     /**
@@ -246,11 +471,21 @@ class GameEngine {
         // 监听事件完成
         document.addEventListener('eventCompleted', (e) => {
             console.log('Event completed:', e.detail.event.name);
+            
+            // 处理交互圈完成状态
+            if (this.interactionCircleRenderer) {
+                this.interactionCircleRenderer.onInteractionComplete();
+            }
         });
         
         // 监听事件失败
         document.addEventListener('eventFailed', (e) => {
             console.log('Event failed:', e.detail.event.name);
+            
+            // 处理交互圈超时状态
+            if (this.interactionCircleRenderer) {
+                this.interactionCircleRenderer.onInteractionTimeout();
+            }
         });
         
         // 监听阶段转换
@@ -322,6 +557,40 @@ class GameEngine {
                 // DifficultyManager doesn't need regular updates, it responds to events
             }
             
+            // 更新动画系统
+            if (this.animationEngine) {
+                // AnimationEngine has its own update loop, but we can sync state here
+                const currentStage = this.stateManager.getCurrentStage();
+                if (currentStage && this.animationEngine.currentStageId !== currentStage.id) {
+                    this.animationEngine.currentStageId = currentStage.id;
+                }
+            }
+            
+            // 更新角色渲染器
+            if (this.characterRenderer) {
+                this.characterRenderer.update(deltaTime);
+            }
+            
+            // 更新移动控制器
+            if (this.movementController) {
+                this.movementController.update(deltaTime);
+            }
+            
+            // 更新交互管理器
+            if (this.interactionManager) {
+                this.interactionManager.update(deltaTime);
+            }
+            
+            // 更新交互圈渲染器
+            if (this.interactionCircleRenderer) {
+                this.interactionCircleRenderer.update(deltaTime);
+            }
+            
+            // 更新动画可见性管理器
+            if (this.animationVisibilityManager) {
+                this.animationVisibilityManager.update(deltaTime);
+            }
+            
             // 更新游戏逻辑
             this.updateGameLogic(deltaTime);
         } catch (error) {
@@ -333,6 +602,22 @@ class GameEngine {
                 });
             } else {
                 console.error('Update error:', error);
+            }
+        }
+    }
+    
+    /**
+     * 更新游戏逻辑
+     */
+    updateGameLogic(deltaTime) {
+        // 这里可以添加额外的游戏逻辑更新
+        // 例如：特殊效果、动画状态同步等
+        
+        // 同步动画系统状态
+        if (this.animationEngine && this.stateManager) {
+            const currentStage = this.stateManager.getCurrentStage();
+            if (currentStage && this.animationEngine.currentStageId !== currentStage.id) {
+                this.animationEngine.currentStageId = currentStage.id;
             }
         }
     }
@@ -358,7 +643,24 @@ class GameEngine {
             this.ctx.clearRect(0, 0, scaledSize.width / renderScale, scaledSize.height / renderScale);
             
             // 渲染背景
-            if (this.pixelRenderer && this.stateManager) {
+            const renderStyle = this.gameSettings?.renderStyle || 'rpg';
+            
+            if (renderStyle === 'rpg' && this.rpgRenderer && this.stateManager) {
+                const currentStage = this.stateManager.getCurrentStage();
+                const characterPosition = this.movementController ? 
+                    this.movementController.getCurrentPosition() : 
+                    { x: scaledSize.width / 2, y: scaledSize.height / 2 };
+                
+                if (currentStage) {
+                    // 使用RPG风格渲染完整场景
+                    this.rpgRenderer.renderRPGScene(
+                        currentStage.id, 
+                        characterPosition.x, 
+                        characterPosition.y, 
+                        scale * renderScale
+                    );
+                }
+            } else if (renderStyle === 'pixel' && this.pixelRenderer && this.stateManager) {
                 const currentStage = this.stateManager.getCurrentStage();
                 if (currentStage) {
                     this.pixelRenderer.renderBackground(currentStage.id, scale * renderScale);
@@ -369,13 +671,35 @@ class GameEngine {
                 this.ctx.fillRect(0, 0, scaledSize.width / renderScale, scaledSize.height / renderScale);
             }
             
-            // 渲染游戏组件
-            if (this.stateManager) {
+            // 渲染角色（使用新的角色渲染器）
+            if (renderStyle === 'rpg' && this.rpgRenderer && this.stateManager) {
+                // RPG渲染器已经在renderRPGScene中渲染了角色，这里不需要重复渲染
+            } else if (this.characterRenderer && this.stateManager) {
+                const currentStage = this.stateManager.getCurrentStage();
+                const characterPosition = this.movementController ? 
+                    this.movementController.getCurrentPosition() : 
+                    { x: scaledSize.width / 2, y: scaledSize.height / 2 };
+                
+                if (currentStage) {
+                    this.characterRenderer.renderCharacter(
+                        currentStage.id,
+                        characterPosition,
+                        'neutral' // emotion can be dynamic based on game state
+                    );
+                }
+            } else {
+                // 回退到基础角色渲染
                 this.renderGameState(scale * renderScale, scaledSize);
             }
             
+            // 渲染游戏组件
             if (this.eventSystem) {
                 this.renderEvents(scale * renderScale, scaledSize);
+            }
+            
+            // 渲染交互圈
+            if (this.interactionCircleRenderer) {
+                this.interactionCircleRenderer.render();
             }
             
             if (this.scoreSystem) {

@@ -107,7 +107,7 @@
 2. WHILE 出生动画播放 THEN Life_Journey_Game SHALL 保持游戏计时器暂停状态
 3. WHEN 出生动画完成 THEN Life_Journey_Game SHALL 以婴儿形态保留角色在画面中央
 4. WHEN 出生动画结束 THEN Life_Journey_Game SHALL 开始正常游戏倒计时
-5. WHEN 出生动画播放 THEN Life_Journey_Game SHALL 显示生命诞生的光芒和温暖效果
+5. WHEN 出生动画播放 THEN Life_Journey_Game SHALL 显示可爱温馨的生命诞生效果和柔和光芒
 
 ### 需求 8: 角色形态变化系统
 
@@ -115,11 +115,11 @@
 
 #### 验收标准
 
-1. WHEN 进入婴儿期 THEN Life_Journey_Game SHALL 显示婴儿形态（小巧、圆润、天真）
-2. WHEN 进入儿童期 THEN Life_Journey_Game SHALL 转变为儿童形态（活泼、好奇、精力充沛）
-3. WHEN 进入青少年期 THEN Life_Journey_Game SHALL 转变为青少年形态（修长、朝气、略显青涩）
-4. WHEN 进入成年期 THEN Life_Journey_Game SHALL 转变为成人形态（成熟、稳重、自信）
-5. WHEN 进入老年期 THEN Life_Journey_Game SHALL 转变为老人形态（慈祥、智慧、从容）
+1. WHEN 进入婴儿期 THEN Life_Journey_Game SHALL 显示可爱的婴儿形态（小巧、圆润、天真）
+2. WHEN 进入儿童期 THEN Life_Journey_Game SHALL 转变为可爱的儿童形态（活泼、好奇、精力充沛）
+3. WHEN 进入青少年期 THEN Life_Journey_Game SHALL 转变为可爱的青少年形态（修长、朝气、略显青涩）
+4. WHEN 进入成年期 THEN Life_Journey_Game SHALL 转变为可爱的成人形态（成熟、稳重、自信）
+5. WHEN 进入老年期 THEN Life_Journey_Game SHALL 转变为可爱的老人形态（慈祥、智慧、从容）
 6. WHEN 角色形态转变 THEN Life_Journey_Game SHALL 显示成长变化的过渡动画
 
 ### 需求 9: 华丽视觉特效系统
@@ -206,6 +206,55 @@
 8. WHEN 买车实现梦想事件触发 THEN Life_Journey_Game SHALL 展现汽车尾气和驾驶运动
 9. WHEN 投资理财成功事件触发 THEN Life_Journey_Game SHALL 产生金钱雨和财富光芒
 10. WHEN 照顾年迈父母事件触发 THEN Life_Journey_Game SHALL 显示关爱之心和温柔照料
+
+### 需求 16: 游戏界面集成系统
+
+**用户故事:** 作为玩家，我希望游戏界面简洁统一，所有控制功能都集成在游戏画面内，避免多余的外部按钮。
+
+#### 验收标准
+
+1. WHEN 游戏加载完成 THEN Life_Journey_Game SHALL 移除游戏画面下方的开始游戏和重新开始按钮
+2. WHEN 游戏初始化 THEN Life_Journey_Game SHALL 自动开始出生动画而不需要额外的开始按钮
+3. WHEN 游戏结束 THEN Life_Journey_Game SHALL 在游戏画面内显示重新开始按钮
+4. WHEN 玩家点击游戏内重新开始按钮 THEN Life_Journey_Game SHALL 重置游戏状态并开始新游戏
+5. WHEN 游戏界面显示 THEN Life_Journey_Game SHALL 保持简洁统一的视觉风格
+
+### 需求 17: 交互圈显示系统
+
+**用户故事:** 作为玩家，我希望清楚地看到可以交互的区域，知道应该点击哪里来完成人生事件。
+
+#### 验收标准
+
+1. WHEN 人生事件触发 THEN Life_Journey_Game SHALL 显示明显的交互圈或提示区域
+2. WHEN 交互圈显示 THEN Life_Journey_Game SHALL 使用醒目的颜色和动画效果
+3. WHEN 玩家需要点击时 THEN Life_Journey_Game SHALL 显示脉动或闪烁的交互提示
+4. WHEN 交互完成 THEN Life_Journey_Game SHALL 隐藏交互圈并提供视觉反馈
+5. WHEN 交互超时 THEN Life_Journey_Game SHALL 淡出交互圈并继续游戏
+
+### 需求 18: 事件动画可见性系统
+
+**用户故事:** 作为玩家，我希望能够清楚地看到所有人生事件的动画效果，感受每个重要时刻。
+
+#### 验收标准
+
+1. WHEN 任何人生事件触发 THEN Life_Journey_Game SHALL 确保动画在屏幕中央可见区域播放
+2. WHEN 事件动画播放 THEN Life_Journey_Game SHALL 使用足够大的尺寸和清晰的视觉效果
+3. WHEN 动画进行中 THEN Life_Journey_Game SHALL 暂停其他干扰性视觉元素
+4. WHEN 事件动画完成 THEN Life_Journey_Game SHALL 提供明确的完成反馈
+5. WHEN 动画播放失败 THEN Life_Journey_Game SHALL 显示备用的文字描述
+
+### 需求 19: 游戏结束评价系统
+
+**用户故事:** 作为玩家，我希望在游戏结束后看到详细的评价和反馈，了解我的人生旅程表现。
+
+#### 验收标准
+
+1. WHEN 游戏结束 THEN Life_Journey_Game SHALL 显示基于分数的详细评语和人生总结
+2. WHEN 分数在0-30%范围时 THEN Life_Journey_Game SHALL 显示"匆忙人生 - 生活节奏太快，错过了很多美好时光"评价
+3. WHEN 分数在31-60%范围时 THEN Life_Journey_Game SHALL 显示"平凡人生 - 虽然平淡，但也有属于自己的精彩"评价
+4. WHEN 分数在61-85%范围时 THEN Life_Journey_Game SHALL 显示"充实人生 - 把握了大部分机会，活得很精彩"评价
+5. WHEN 分数在86-100%范围时 THEN Life_Journey_Game SHALL 显示"完美人生 - 几乎没有遗憾，真正活出了自己"评价
+6. WHEN 评价显示完成 THEN Life_Journey_Game SHALL 在界面中显示重新开始按钮
 
 ### 需求 15: 老年期动画系统
 

@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生旅程游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        #gameCanvas {
+            border: 3px solid #4ecdc4;
+            border-radius: 15px;
+            background: #16213e;
+            margin: 20px 0;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+        
+        .info {
+            text-align: center;
+            margin: 15px 0;
+            max-width: 900px;
+        }
+        
+        .status {
+            font-size: 20px;
+            color: #4ecdc4;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        h1 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #44a08d;
+        }
+    </style>
+</head>
+<body>
+    <h1> 人生旅程游戏</h1>
+    <div class="info">
+        <div id="status" class="status">准备开始您的人生旅程...</div>
+        <div style="font-size: 14px; color: #cccccc; margin-top: 10px;">
+            快捷键: 空格键-开始/暂停 | R-重新开始 | S-切换渲染风格 | D-调试模式 | P-性能统计
+        </div>
+    </div>
+    
+    <canvas id="gameCanvas" width="900" height="700"></canvas>
+    
+    <div>
+        <button class="btn" onclick="startGame()">开始游戏</button>
+        <button class="btn" onclick="resetGame()">重新开始</button>
+    </div>
+    
+    <!-- Core System Scripts -->
+    <script src="src/core/ErrorHandler.js"></script>
+    <script src="src/core/PerformanceManager.js"></script>
+    <script src="src/core/ObjectPool.js"></script>
+    <script src="src/core/StateManager.js"></script>
+    <script src="src/core/EventSystem.js"></script>
+    <script src="src/core/InputHandler.js"></script>
+    <script src="src/core/AudioManager.js"></script>
+    <script src="src/core/ScoreSystem.js"></script>
+    <script src="src/core/DifficultyManager.js"></script>
+    <script src="src/core/ResponsiveManager.js"></script>
+    <script src="src/core/GameUIManager.js"></script>
+    <script src="src/core/EvaluationSystem.js"></script>
+    <script src="src/core/GameEngine.js"></script>
+    
+    <!-- Data and Models -->
+    <script src="src/data/LifeEventsData.js"></script>
+    <script src="src/models/GameState.js"></script>
+    <script src="src/models/LifeStage.js"></script>
+    <script src="src/models/LifeEvent.js"></script>
+    <script src="src/models/InteractionTarget.js"></script>
+    
+    <!-- Graphics and Animation System -->
+    <script src="src/graphics/PixelArtRenderer.js"></script>
+    <script src="src/graphics/RPGStyleRenderer.js"></script>
+    <script src="src/graphics/CharacterRenderer.js"></script>
+    <script src="src/graphics/EffectRenderer.js"></script>
+    <script src="src/graphics/InteractionCircleRenderer.js"></script>
+    <script src="src/graphics/AnimationVisibilityManager.js"></script>
+    <script src="src/graphics/effects/ParticleSystem.js"></script>
+    <script src="src/graphics/movement/MovementController.js"></script>
+    <script src="src/graphics/movement/InteractionManager.js"></script>
+    <script src="src/graphics/AnimationEngine.js"></script>
+    <script src="src/graphics/characters/CharacterAssets.js"></script>
+    
+    <!-- Animation Modules -->
+    <script src="src/animations/birth/BirthAnimation.js"></script>
+    <script src="src/animations/stages/BabyStageAnimation.js"></script>
+    <script src="src/animations/stages/ChildStageAnimation.js"></script>
+    <script src="src/animations/stages/TeenStageAnimation.js"></script>
+    <script src="src/animations/stages/AdultStageAnimation.js"></script>
+    <script src="src/animations/stages/ElderStageAnimation.js"></script>
+    
+    <!-- Interaction Types -->
+    <script src="src/interactions/InteractionTypes.js"></script>
+    
+    <!-- Main Game -->
+    <script src="src/main.js"></script>
+    
+    <script>
+        // Global game control functions for buttons
+        function startGame() {
+            if (game && game.isInitialized && !game.isStarted) {
+                game.startGame();
+            }
+        }
+        
+        function resetGame() {
+            if (game) {
+                game.stopGame();
+                // Reinitialize after a short delay
+                setTimeout(() => {
+                    if (game.isInitialized) {
+                        game.showStartPrompt();
+                    }
+                }, 100);
+            }
+        }
+        
+        function pauseGame() {
+            if (game && game.isStarted) {
+                game.pauseGame();
+            }
+        }
+        
+        function resumeGame() {
+            if (game && game.isStarted) {
+                game.resumeGame();
+            }
+        }
+        
+        // Debug mode toggle
+        function toggleDebugMode() {
+            window.DEBUG_MODE = !window.DEBUG_MODE;
+            console.log('Debug mode:', window.DEBUG_MODE ? 'ON' : 'OFF');
+        }
+        
+        // Performance monitoring
+        function showPerformanceStats() {
+            if (game && game.gameEngine && game.gameEngine.performanceManager) {
+                const stats = game.gameEngine.performanceManager.getPerformanceStats();
+                console.log('Performance Stats:', stats);
+                alert(`FPS: ${stats.currentFPS}\nMemory: ${stats.memoryUsage.used}MB\nRender Time: ${stats.renderTime.toFixed(2)}ms`);
+            }
+        }
+        
+        // Toggle render style
+        function toggleRenderStyle() {
+            if (game && game.settings) {
+                game.settings.renderStyle = game.settings.renderStyle === 'rpg' ? 'pixel' : 'rpg';
+                console.log('Render style switched to:', game.settings.renderStyle);
+                
+                // 更新状态显示
+                const statusElement = document.getElementById('status');
+                if (statusElement) {
+                    statusElement.textContent = `渲染风格: ${game.settings.renderStyle === 'rpg' ? '16位RPG风格' : '像素艺术风格'}`;
+                }
+            }
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ': // Space to start/pause
+                    e.preventDefault();
+                    if (game && game.isStarted) {
+                        pauseGame();
+                    } else if (game && game.isInitialized) {
+                        startGame();
+                    }
+                    break;
+                case 'r': // R to reset
+                    e.preventDefault();
+                    resetGame();
+                    break;
+                case 'd': // D for debug
+                    e.preventDefault();
+                    toggleDebugMode();
+                    break;
+                case 'p': // P for performance stats
+                    e.preventDefault();
+                    showPerformanceStats();
+                    break;
+                case 's': // S to switch render style
+                    e.preventDefault();
+                    toggleRenderStyle();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

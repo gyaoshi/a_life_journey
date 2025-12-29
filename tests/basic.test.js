@@ -48,7 +48,7 @@ describe('项目结构测试', () => {
   });
   
   test('HTML文件应该包含Canvas元素', () => {
-    const htmlContent = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf8');
+    const htmlContent = fs.readFileSync(path.join(process.cwd(), 'enhanced-game.html'), 'utf8');
     
     expect(htmlContent).toContain('<canvas id="gameCanvas"');
     expect(htmlContent).toContain('人生旅程游戏');

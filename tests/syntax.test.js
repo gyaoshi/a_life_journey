@@ -47,7 +47,7 @@ describe('JavaScript语法验证', () => {
   });
   
   test('HTML文件应该正确引用所有JavaScript文件', () => {
-    const htmlPath = path.join(process.cwd(), 'index.html');
+    const htmlPath = path.join(process.cwd(), 'enhanced-game.html');
     const htmlContent = fs.readFileSync(htmlPath, 'utf8');
     
     // 检查核心文件引用

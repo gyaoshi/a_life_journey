@@ -36,6 +36,9 @@ export class AnimationEngine {
         // 错误处理
         this.errorHandlers = new Map();
         
+        // 动画可见性管理器引用
+        this.animationVisibilityManager = null;
+        
         this.init();
     }
     
@@ -52,6 +55,15 @@ export class AnimationEngine {
             quality: this.options.quality,
             fps: this.options.fps
         });
+    }
+    
+    /**
+     * 设置动画可见性管理器
+     * @param {AnimationVisibilityManager} manager - 动画可见性管理器实例
+     */
+    setAnimationVisibilityManager(manager) {
+        this.animationVisibilityManager = manager;
+        console.log('AnimationVisibilityManager set for AnimationEngine');
     }
     
     /**
@@ -157,6 +169,18 @@ export class AnimationEngine {
             const animation = await this.loadAnimation(animationType);
             if (!animation) {
                 throw new Error(`Failed to load animation: ${animationType}`);
+            }
+            
+            // 使用动画可见性管理器确保动画可见
+            if (this.animationVisibilityManager) {
+                try {
+                    await this.animationVisibilityManager.ensureAnimationVisible(animation, {
+                        duration: duration,
+                        minSize: { width: 200, height: 150 }
+                    });
+                } catch (visibilityError) {
+                    console.warn('Animation visibility management failed, continuing with normal playback:', visibilityError);
+                }
             }
             
             // 设置动画状态

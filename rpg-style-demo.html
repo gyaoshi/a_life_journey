@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG风格演示</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #demoCanvas {
+            border: 3px solid #4ecdc4;
+            border-radius: 15px;
+            background: #16213e;
+            margin: 20px 0;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #44a08d;
+        }
+        
+        h1 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+        
+        .info {
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 16位RPG风格演示</h1>
+    <div class="info">
+        <p>这是经典16位RPG游戏风格的演示，包含草地、树木、角色和物品。</p>
+        <p>点击按钮切换不同的人生阶段，观察角色和场景的变化。</p>
+    </div>
+    
+    <canvas id="demoCanvas" width="800" height="600"></canvas>
+    
+    <div class="controls">
+        <button class="btn" onclick="changeStage('baby')">婴儿期</button>
+        <button class="btn" onclick="changeStage('child')">儿童期</button>
+        <button class="btn" onclick="changeStage('teen')">青少年期</button>
+        <button class="btn" onclick="changeStage('adult')">成年期</button>
+        <button class="btn" onclick="changeStage('elder')">老年期</button>
+    </div>
+    
+    <script src="src/graphics/RPGStyleRenderer.js"></script>
+    
+    <script>
+        // 初始化演示
+        const canvas = document.getElementById('demoCanvas');
+        const rpgRenderer = new RPGStyleRenderer(canvas);
+        
+        let currentStage = 'adult';
+        let characterX = canvas.width / 2;
+        let characterY = canvas.height / 2;
+        
+        // 渲染场景
+        function renderScene() {
+            rpgRenderer.renderRPGScene(currentStage, characterX, characterY, 1);
+        }
+        
+        // 切换人生阶段
+        function changeStage(stage) {
+            currentStage = stage;
+            renderScene();
+        }
+        
+        // 点击移动角色
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            characterX = event.clientX - rect.left;
+            characterY = event.clientY - rect.top;
+            renderScene();
+        });
+        
+        // 初始渲染
+        renderScene();
+        
+        // 添加动画效果
+        function animate() {
+            // 重新渲染以显示动态效果（如篝火）
+            renderScene();
+            requestAnimationFrame(animate);
+        }
+        
+        // 启动动画循环
+        animate();
+    </script>
+</body>
+</html>

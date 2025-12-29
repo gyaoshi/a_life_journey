@@ -20,6 +20,14 @@ class LifeJourneyGame {
         this.scoreSystem = null;
         this.difficultyManager = null;
         this.gameState = null;
+        this.uiManager = null;
+        
+        // 游戏设置
+        this.settings = {
+            renderStyle: 'rpg', // 'rpg' 或 'pixel'
+            enableAnimations: true,
+            showDebugInfo: false
+        };
         
         this.isInitialized = false;
         this.isStarted = false;
@@ -57,8 +65,23 @@ class LifeJourneyGame {
                 this.eventSystem,
                 this.inputHandler,
                 this.scoreSystem,
-                this.difficultyManager
+                this.difficultyManager,
+                this.settings
             );
+            
+            // 初始化UI管理器
+            if (typeof GameUIManager !== 'undefined') {
+                this.uiManager = new GameUIManager(this.canvas, this.gameEngine);
+                this.gameEngine.game = this; // 设置游戏引擎的游戏实例引用
+                this.uiManager.initialize();
+                console.log('GameUIManager initialized');
+            }
+            
+            // 初始化评价系统
+            if (typeof EvaluationSystem !== 'undefined') {
+                this.evaluationSystem = new EvaluationSystem();
+                console.log('EvaluationSystem initialized');
+            }
             
             // 设置输入事件回调
             this.setupInputCallbacks();
@@ -75,8 +98,12 @@ class LifeJourneyGame {
                 loadingText.style.display = 'none';
             }
             
-            // 显示开始提示
-            this.showStartPrompt();
+            // 自动开始游戏（通过UI管理器）
+            if (this.uiManager) {
+                this.uiManager.integrateUIElements();
+            } else {
+                this.showStartPrompt();
+            }
             
         } catch (error) {
             console.error('Failed to initialize game:', error);
@@ -201,10 +228,25 @@ class LifeJourneyGame {
         // 计算最终评价
         const finalEvaluation = this.scoreSystem.calculateFinalEvaluation();
         
-        // 显示游戏结果
-        this.showGameResult(finalEvaluation);
+        // 使用评价系统生成详细评价
+        let detailedEvaluation = finalEvaluation;
+        if (this.evaluationSystem) {
+            detailedEvaluation = this.evaluationSystem.generateEvaluation(
+                finalEvaluation.totalScore,
+                finalEvaluation.totalPossibleEvents,
+                finalEvaluation.completedEvents
+            );
+        }
         
-        console.log('Game ended', finalEvaluation);
+        // 使用UI管理器显示游戏结果
+        if (this.uiManager) {
+            this.uiManager.showGameEndScreen(detailedEvaluation.score, detailedEvaluation);
+        } else {
+            // 回退到原始显示方法
+            this.showGameResult(detailedEvaluation);
+        }
+        
+        console.log('Game ended', detailedEvaluation);
     }
     
     /**
@@ -383,6 +425,10 @@ class LifeJourneyGame {
         
         if (this.audioManager) {
             this.audioManager.stopBackgroundMusic();
+        }
+        
+        if (this.uiManager) {
+            this.uiManager.cleanup();
         }
         
         this.isStarted = false;

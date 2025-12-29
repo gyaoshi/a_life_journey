@@ -164,6 +164,56 @@ class MovementController {
 }
 ```
 
+### InteractionCircleRenderer
+```javascript
+class InteractionCircleRenderer {
+  constructor(context, options)
+  showInteractionCircle(position, type) // 显示交互圈
+  hideInteractionCircle()    // 隐藏交互圈
+  animateCircle(animation)   // 播放圈动画(脉动/闪烁)
+  setCircleStyle(style)      // 设置圈样式
+  updateCirclePosition(x, y) // 更新圈位置
+  isCircleVisible()          // 检查圈是否可见
+}
+```
+
+### GameUIManager
+```javascript
+class GameUIManager {
+  constructor(canvas, gameEngine)
+  removeExternalButtons()    // 移除外部按钮
+  showGameEndScreen(score, evaluation) // 显示游戏结束界面
+  showRestartButton()        // 显示重新开始按钮
+  hideRestartButton()        // 隐藏重新开始按钮
+  handleRestartClick()       // 处理重新开始点击
+  integrateUIElements()      // 集成UI元素到游戏内
+}
+```
+
+### AnimationVisibilityManager
+```javascript
+class AnimationVisibilityManager {
+  constructor(canvas, animationEngine)
+  ensureAnimationVisible(animation) // 确保动画可见
+  centerAnimation(animation) // 居中动画
+  adjustAnimationSize(animation, minSize) // 调整动画大小
+  pauseBackgroundElements()  // 暂停背景元素
+  resumeBackgroundElements() // 恢复背景元素
+  showFallbackText(eventName) // 显示备用文字
+}
+```
+
+### EvaluationSystem
+```javascript
+class EvaluationSystem {
+  constructor(scoreSystem)
+  generateDetailedEvaluation(score) // 生成详细评价
+  getEvaluationText(scorePercentage) // 获取评价文字
+  showEvaluationScreen(evaluation) // 显示评价界面
+  formatLifeSummary(completedEvents) // 格式化人生总结
+}
+```
+
 ## 数据模型
 
 ### GameState
@@ -288,6 +338,88 @@ class MovementController {
 }
 ```
 
+### InteractionCircleConfig
+```javascript
+{
+  position: {x, y},         // 圈位置
+  radius: number,           // 圈半径
+  color: string,            // 圈颜色
+  strokeWidth: number,      // 线条宽度
+  animation: {
+    type: string,           // 动画类型 (pulse, blink, rotate)
+    duration: number,       // 动画持续时间
+    intensity: number       // 动画强度
+  },
+  visibility: {
+    fadeIn: number,         // 淡入时间
+    fadeOut: number,        // 淡出时间
+    timeout: number         // 超时时间
+  }
+}
+```
+
+### GameUIConfig
+```javascript
+{
+  externalButtons: {
+    startButton: HTMLElement, // 开始按钮元素
+    restartButton: HTMLElement // 重新开始按钮元素
+  },
+  inGameUI: {
+    restartButton: {
+      position: {x, y},     // 游戏内重新开始按钮位置
+      size: {width, height}, // 按钮大小
+      style: Object         // 按钮样式
+    },
+    evaluationScreen: {
+      background: string,   // 背景样式
+      textStyle: Object,    // 文字样式
+      layout: Object        // 布局配置
+    }
+  }
+}
+```
+
+### EvaluationData
+```javascript
+{
+  score: number,            // 最终分数
+  scorePercentage: number,  // 分数百分比
+  completedEvents: number,  // 完成事件数
+  totalEvents: number,      // 总事件数
+  evaluation: {
+    title: string,          // 评价标题
+    description: string,    // 详细描述
+    category: string        // 评价类别
+  },
+  lifeSummary: {
+    highlights: Array,      // 人生亮点
+    missedOpportunities: Array, // 错过的机会
+    overallMessage: string  // 总体寄语
+  }
+}
+```
+
+### AnimationVisibilityConfig
+```javascript
+{
+  centerPosition: {x, y},   // 中心位置
+  minSize: {width, height}, // 最小尺寸
+  maxSize: {width, height}, // 最大尺寸
+  visibilityArea: {         // 可见区域
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  },
+  fallbackOptions: {
+    showText: boolean,      // 是否显示备用文字
+    textStyle: Object,      // 文字样式
+    duration: number        // 显示时长
+  }
+}
+```
+
 ## 正确性属性
 
 *属性是一个特征或行为，应该在系统的所有有效执行中保持为真——本质上是关于系统应该做什么的正式声明。属性作为人类可读规范和机器可验证正确性保证之间的桥梁。*
@@ -366,6 +498,50 @@ class MovementController {
 **属性 17: 评价系统一致性**
 *对于任何*最终分数百分比，显示的评价应该与预定义的分数区间对应(0-30%:"匆忙人生", 31-60%:"平凡人生", 61-85%:"充实人生", 86-100%:"完美人生")
 **验证: 需求 6.2, 6.3, 6.4, 6.5**
+
+**属性 18: UI集成一致性**
+*对于任何*游戏加载完成状态，外部按钮应该被移除且游戏应该自动开始出生动画
+**验证: 需求 16.1, 16.2**
+
+**属性 19: 游戏内重新开始功能**
+*对于任何*游戏结束状态，游戏画面内应该显示重新开始按钮，点击后应该重置游戏状态
+**验证: 需求 16.3, 16.4**
+
+**属性 20: 交互圈显示一致性**
+*对于任何*触发的人生事件，都应该显示相应的交互圈或提示区域
+**验证: 需求 17.1**
+
+**属性 21: 交互圈动画效果**
+*对于任何*显示的交互圈，都应该包含脉动或闪烁等动画效果
+**验证: 需求 17.2, 17.3**
+
+**属性 22: 交互圈状态管理**
+*对于任何*交互圈，完成交互后应该隐藏，超时后应该淡出
+**验证: 需求 17.4, 17.5**
+
+**属性 23: 动画可见性保证**
+*对于任何*触发的事件动画，都应该在屏幕中央可见区域播放且尺寸足够大
+**验证: 需求 18.1, 18.2**
+
+**属性 24: 动画播放状态管理**
+*对于任何*播放中的事件动画，其他干扰性视觉元素应该被暂停
+**验证: 需求 18.3**
+
+**属性 25: 动画完成反馈**
+*对于任何*完成的事件动画，都应该提供明确的完成反馈
+**验证: 需求 18.4**
+
+**属性 26: 动画错误处理**
+*对于任何*播放失败的动画，都应该显示备用的文字描述
+**验证: 需求 18.5**
+
+**属性 27: 详细评价显示**
+*对于任何*游戏结束状态，都应该显示基于分数的详细评语和人生总结
+**验证: 需求 19.1**
+
+**属性 28: 评价完成后UI状态**
+*对于任何*评价显示完成状态，界面中都应该显示重新开始按钮
+**验证: 需求 19.6**
 
 ## 错误处理
 
